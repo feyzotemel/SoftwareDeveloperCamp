@@ -17,21 +17,29 @@ namespace project.API.Controllers
         {
             try
             {
-                //return ProductTest();
-                ProductManager productManager = new ProductManager(new EfProductDal());
-                var product = new Product()
-                {
-                    CategoryId = 2,
-                    ProductId = 5,
-                    ProductName = "çorap",
-                    UnitPrice = 15,
-                    UnitsInStock = 5
-                };
-                productManager.Add(product);
+                return ProductTest();
+               // ProductManager productManager = new ProductManager(new EfProductDal());
+               // var product = new Product()
+               // {
+               //     CategoryId = 2,
+               //     ProductId = 5,
+               //     ProductName = "çorap",
+               //     UnitPrice = 15,
+               //     UnitsInStock = 5
+               // };
+               //var result =  productManager.Add(product);
+               // if (result.Success)
+               // {
+               //     return Ok(result.Message);
 
+               // }
+               // else
+               // {
+               //     return BadRequest(result.Message);
+               // }
 
-                return Ok("Ekleme işlemi Başarılı");
-                    //return CategoryTest();
+               // return Ok("Ekleme işlemi Başarılı");
+               // //return CategoryTest();
 
             }
             catch (Exception ex)
@@ -57,9 +65,16 @@ namespace project.API.Controllers
         private ActionResult ProductTest()
         {
             ProductManager productManager = new ProductManager(new EfProductDal());
-            var data = productManager.GetProductDetails();
+            var result = productManager.GetProductDetails();
+            if (result.Success)
+            {
+                return Ok(result.Data);
 
-            return Ok(data);
+            }
+            else
+            {
+                return BadRequest(result.Message);
+            }
         }
     }
 }
