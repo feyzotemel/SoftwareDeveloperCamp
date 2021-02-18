@@ -13,5 +13,6 @@ namespace Business.Constants
         public static string ProductDeleted = "Ürün silindi";
         internal static string MaintenanceTime = "Sistem bakımda";
         internal static string ProductsListed = "Ürünler listelendi";
+        internal static string ProductsMustStartWithA = "Ürünler A harfi ile başlamalı";
     }
 }
