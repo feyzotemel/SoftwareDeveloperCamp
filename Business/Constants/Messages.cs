@@ -14,5 +14,10 @@ namespace Business.Constants
         internal static string MaintenanceTime = "Sistem bakımda";
         internal static string ProductsListed = "Ürünler listelendi";
         internal static string ProductsMustStartWithA = "Ürünler A harfi ile başlamalı";
+
+        internal static string ProductCountOfCategoryError = "Bir kategoride en fazla 10 ürün olabilir.";
+        internal static string ProductNameExist = "Aynı isimde ürün eklenemez.";
+
+        internal static string CategoryLimitExceded = "Kategori sayısı aşıldığı için yeni ürün eklenemez";
     }
 }

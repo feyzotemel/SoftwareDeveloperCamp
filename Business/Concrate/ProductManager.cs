@@ -3,6 +3,7 @@ using Business.Constants;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConcerns.Validation;
+using Core.Utilities.Business;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrate;
@@ -10,6 +11,7 @@ using Entities.DTOs;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Business.Concrate
@@ -17,23 +19,38 @@ namespace Business.Concrate
     public class ProductManager : IProductService
     {
         IProductDal _productDal;
-
-        public ProductManager(IProductDal productDal)
+        //**Yıldızlı uyarı** Bir entity manager kendisi haricindeki başka dalı enjekte edemez sadece servisi enjekte edebilir..
+        //ICategoryDal _categoryDal;
+        ICategoryService _categoryService;
+        //public ProductManager(IProductDal productDal, ICategoryDal categoryDal)
+        public ProductManager(IProductDal productDal, ICategoryService categoryService)
         {
             _productDal = productDal;
+            //_categoryDal = categoryDal;
+            _categoryService = categoryService;
+
         }
         [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
         {
-            //if (product.ProductName.Length < 2)
-            //{
-            //    return new ErrorResult(Messages.ProductNameInvalid);
-            //}
-            //ValidationTool.Validate(new ProductValidator(), product);
+            IResult result = BusinessRules.Run(CheckProductCountByCategory(product.CategoryId),
+                                                   CheckIfProductNameExist(product.ProductName),
+                                                   CheckIfCategoryLimitExceded());
 
-            _productDal.Add(product);
+            //var categoryCheck = CheckProductCountByCategory(product.CategoryId).Success;
+            //var productNameCheck = CheckIfProductNameExist(product.ProductName).Success;
+            //if (categoryCheck && productNameCheck)
+            if (result == null)
+            {
 
-            return new SucessResult(Messages.ProductAdded);
+                _productDal.Add(product);
+
+                return new SucessResult(Messages.ProductAdded);
+            }
+            return new ErrorResult(result.Message);
+
+
+
         }
 
         public IDataResult<List<Product>> GetAll()
@@ -45,7 +62,7 @@ namespace Business.Concrate
             {
                 return new ErrorDataResult<List<Product>>(Messages.MaintenanceTime);
             }
-            return new SuccessDataResult<List<Product>>(_productDal.GetAll(),Messages.ProductsListed);
+            return new SuccessDataResult<List<Product>>(_productDal.GetAll(), Messages.ProductsListed);
 
 
         }
@@ -53,7 +70,7 @@ namespace Business.Concrate
         public IDataResult<List<Product>> GetAllByCategoryId(int id)
         {
             return new SuccessDataResult<List<Product>>(_productDal.GetAll(c => c.CategoryId == id));
-        }       
+        }
 
         public IDataResult<Product> GetById(int id)
         {
@@ -71,7 +88,45 @@ namespace Business.Concrate
                 return new ErrorDataResult<List<ProductDetailDto>>(Messages.MaintenanceTime);
             }
 
-            return new SuccessDataResult<List<ProductDetailDto>>(_productDal.GetProductDetails(),Messages.ProductsListed);
+            return new SuccessDataResult<List<ProductDetailDto>>(_productDal.GetProductDetails(), Messages.ProductsListed);
+        }
+        [ValidationAspect(typeof(ProductValidator))]
+        public IResult Update(Product product)
+        {
+            //Business da bir yöntemdir ama temiz kod Add methodundaki gibidir. 
+            var categoryCheck = CheckProductCountByCategory(product.CategoryId).Success;
+            var productNameCheck = CheckIfProductNameExist(product.ProductName).Success;
+            var checkIfCategoryLimitExceded = CheckIfCategoryLimitExceded().Success;
+            if (categoryCheck && productNameCheck && checkIfCategoryLimitExceded)
+            {
+                //Güncelle
+            }
+            throw new NotImplementedException();
+        }
+        private IResult CheckProductCountByCategory(int categoryId)
+        {
+            if (_productDal.GetAll(x => x.CategoryId == categoryId).Count() >= 10)
+            {
+                return new ErrorResult(Messages.ProductCountOfCategoryError);
+            }
+            return new SucessResult();
+        }
+        private IResult CheckIfProductNameExist(string productName)
+        {
+            if (_productDal.GetAll(x => x.ProductName == productName).Any())
+            {
+                return new ErrorResult(Messages.ProductNameExist);
+            }
+            return new SucessResult();
+        }
+        private IResult CheckIfCategoryLimitExceded()
+        {
+            var result = _categoryService.GetAll();
+            if (result.Data.Count() > 15)
+            {
+                return new ErrorResult(Messages.CategoryLimitExceded);
+            }
+            return new SucessResult();
         }
     }
 }
