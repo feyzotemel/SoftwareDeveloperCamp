@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Business.BusinessAspects.Autofac;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Validation;
@@ -30,6 +31,7 @@ namespace Business.Concrate
             _categoryService = categoryService;
 
         }
+        [SecuredOperation("product.add")]
         [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
         {
@@ -45,7 +47,7 @@ namespace Business.Concrate
 
                 _productDal.Add(product);
 
-                return new SucessResult(Messages.ProductAdded);
+                return new SuccessResult(Messages.ProductAdded);
             }
             return new ErrorResult(result.Message);
 
@@ -109,7 +111,7 @@ namespace Business.Concrate
             {
                 return new ErrorResult(Messages.ProductCountOfCategoryError);
             }
-            return new SucessResult();
+            return new SuccessResult();
         }
         private IResult CheckIfProductNameExist(string productName)
         {
@@ -117,7 +119,7 @@ namespace Business.Concrate
             {
                 return new ErrorResult(Messages.ProductNameExist);
             }
-            return new SucessResult();
+            return new SuccessResult();
         }
         private IResult CheckIfCategoryLimitExceded()
         {
@@ -126,7 +128,7 @@ namespace Business.Concrate
             {
                 return new ErrorResult(Messages.CategoryLimitExceded);
             }
-            return new SucessResult();
+            return new SuccessResult();
         }
     }
 }
