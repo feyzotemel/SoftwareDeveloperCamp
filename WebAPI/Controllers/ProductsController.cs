@@ -94,7 +94,20 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpGet("AddTransactionalTest")]
+        public IActionResult AddTransactionalTest()
+        {
+            var product = _productService.GetById(1).Data;
 
-
+            var result = _productService.AddTransactionalTest(product);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
     }
 }

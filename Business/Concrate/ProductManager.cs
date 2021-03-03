@@ -2,6 +2,8 @@
 using Business.BusinessAspects.Autofac;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Caching;
+using Core.Aspects.Autofac.Transaction;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConcerns.Validation;
 using Core.Utilities.Business;
@@ -33,6 +35,7 @@ namespace Business.Concrate
         }
         [SecuredOperation("product.add,admin")]
         [ValidationAspect(typeof(ProductValidator))]
+        [CacheRemoveAspect("IProductService.Get")]
         public IResult Add(Product product)
         {
             IResult result = BusinessRules.Run(CheckProductCountByCategory(product.CategoryId),
@@ -55,6 +58,7 @@ namespace Business.Concrate
 
         }
 
+        [CacheAspect]
         public IDataResult<List<Product>> GetAll()
         {
             //return _productDal.GetAll();
@@ -74,6 +78,7 @@ namespace Business.Concrate
             return new SuccessDataResult<List<Product>>(_productDal.GetAll(c => c.CategoryId == id));
         }
 
+        [CacheAspect]
         public IDataResult<Product> GetById(int id)
         {
             return new SuccessDataResult<Product>(_productDal.Get(p => p.ProductId == id));
@@ -93,6 +98,7 @@ namespace Business.Concrate
             return new SuccessDataResult<List<ProductDetailDto>>(_productDal.GetProductDetails(), Messages.ProductsListed);
         }
         [ValidationAspect(typeof(ProductValidator))]
+        [CacheRemoveAspect("IProductService.Get")]
         public IResult Update(Product product)
         {
             //Business da bir yöntemdir ama temiz kod Add methodundaki gibidir. 
@@ -102,8 +108,11 @@ namespace Business.Concrate
             if (categoryCheck && productNameCheck && checkIfCategoryLimitExceded)
             {
                 //Güncelle
+                _productDal.Update(product);
+                return new SuccessResult(Messages.ProductUpdated);
             }
-            throw new NotImplementedException();
+            return new SuccessResult(Messages.ProductNotUpdated);
+
         }
         private IResult CheckProductCountByCategory(int categoryId)
         {
@@ -129,6 +138,20 @@ namespace Business.Concrate
                 return new ErrorResult(Messages.CategoryLimitExceded);
             }
             return new SuccessResult();
+        }
+
+        [TransactionScopeAspect]
+        public IResult AddTransactionalTest(Product product)
+        {
+            var firstProduct = _productDal.Get(x=> x.ProductId == product.ProductId);
+            firstProduct.ProductName = "Güncellenen " + firstProduct.ProductName;
+           var result = Update(firstProduct);
+            throw new NotImplementedException();
+
+            firstProduct.ProductName = "Güncellenen2 " + firstProduct.ProductName;
+            result = Update(firstProduct);
+            return result;
+
         }
     }
 }
