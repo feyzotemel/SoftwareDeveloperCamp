@@ -3,6 +3,7 @@ using Business.BusinessAspects.Autofac;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Caching;
+using Core.Aspects.Autofac.Performance;
 using Core.Aspects.Autofac.Transaction;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConcerns.Validation;
@@ -59,12 +60,14 @@ namespace Business.Concrate
         }
 
         [CacheAspect]
+        [PerformanceAspect(5)]
+
         public IDataResult<List<Product>> GetAll()
         {
             //return _productDal.GetAll();
 
             //return new DataResult<List<Product>>(_productDal.GetAll(),true,"Ürünler Listelendi");
-            if (DateTime.Now.Hour == 1)
+            if (DateTime.Now.Hour == 15)
             {
                 return new ErrorDataResult<List<Product>>(Messages.MaintenanceTime);
             }

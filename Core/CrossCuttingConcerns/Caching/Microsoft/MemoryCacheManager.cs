@@ -53,6 +53,9 @@ namespace Core.CrossCuttingConcerns.Caching.Microsoft
         {
             //Ezbere bilmek gerekmez. MemoryCache in dökümantasyonundan bakılabilir.
             var cacheEntriesCollectionDefinition = typeof(MemoryCache).GetProperty("EntriesCollection", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            //GetService kırmızı olursa business e nuget paket olarak 
+            //Microsoft.Extensions.DependencyInjection kur ve yukarıya elinle 
+            //"using Microsoft.Extensions.DependencyInjection;" ekle lamba çıkmıyor.
             var cacheEntriesCollection = cacheEntriesCollectionDefinition.GetValue(_memoryCache) as dynamic;
             List<ICacheEntry> cacheCollectionValues = new List<ICacheEntry>();
 

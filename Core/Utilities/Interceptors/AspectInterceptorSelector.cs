@@ -17,6 +17,8 @@ namespace Core.Utilities.Interceptors
             var methodAttributes = type.GetMethod(method.Name)
                 .GetCustomAttributes<MethodInterceptionBaseAttribute>(true);
             classAttributes.AddRange(methodAttributes);
+            //Aşağıdaki gibi buraya eklenen tüm Attributelar sistemin heryerinde geçerli olur.
+            //Her methoda tek tek yazılacağına buraya eklenmesi yeterlidir.
             //classAttributes.Add(new ExceptionLogAspect(typeof(FileLogger)));
 
             return classAttributes.OrderBy(x => x.Priority).ToArray();
