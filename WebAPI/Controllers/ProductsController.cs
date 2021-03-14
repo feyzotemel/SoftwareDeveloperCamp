@@ -1,13 +1,9 @@
 ﻿using Business.Abstract;
-using Business.Concrate;
-using DataAccess.Concrate.EntityFramework;
 using Entities.Concrate;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace WebAPI.Controllers
 {
@@ -29,8 +25,8 @@ namespace WebAPI.Controllers
         {
             try
             {
+                Thread.Sleep(1000);
                 var result = _productService.GetAll();
-                var products = new List<Product>();
                 if (result.Success)
                 {
                     return Ok(result);
@@ -53,6 +49,28 @@ namespace WebAPI.Controllers
             try
             {
                 var result = _productService.GetById(id);
+                if (result.Success)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result.Message);
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+        
+        [HttpGet("GetByCategory")]
+        public IActionResult GetByCategory(int categoryId)
+        {
+            try
+            {
+                var result = _productService.GetAllByCategoryId(categoryId);
                 if (result.Success)
                 {
                     return Ok(result);
