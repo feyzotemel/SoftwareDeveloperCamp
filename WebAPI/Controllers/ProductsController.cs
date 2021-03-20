@@ -91,8 +91,7 @@ namespace WebAPI.Controllers
         [HttpPost("Add")]
         public IActionResult Add(Product product)
         {
-            try
-            {
+           
                 var result = _productService.Add(product);
                 var products = new List<Product>();
                 if (result.Success)
@@ -102,14 +101,7 @@ namespace WebAPI.Controllers
                 else
                 {
                     return BadRequest(result.Message);
-                }
-
-            }
-            catch (Exception ex)
-            {
-
-                return BadRequest(ex.Message);
-            }
+                }           
         }
 
         [HttpGet("AddTransactionalTest")]
